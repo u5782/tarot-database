@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>塔羅牌案例資料庫</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Söhne", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, "Segoe UI", Arial, Roboto, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #e5e5e5;
+            overflow: hidden;
+        }
+
+        .header {
+            background: #ffffff;
+            color: #2f2f2f;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            color: #2f2f2f;
+            font-weight: 600;
+        }
+
+        .controls {
+            padding: 20px;
+            background: #ffffff;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .btn {
+            background: #da7756;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            margin-right: 10px;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .btn:hover {
+            background: #c96942;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+        }
+
+        .btn-danger:hover {
+            background: #d43525;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 70vh;
+            border: 1px solid #e5e5e5;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 1px solid #e5e5e5;
+            border-right: 1px solid #e5e5e5;
+        }
+
+        th {
+            background: #f8f8f8;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            color: #2f2f2f;
+        }
+
+        tr:hover {
+            background: #f8f8f8;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #d1d1d1;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.2s ease;
+            background: #ffffff;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #da7756;
+            box-shadow: 0 0 0 2px rgba(218, 119, 86, 0.2);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .tarot-selector {
+            position: relative;
+            width: 200px;
+        }
+
+        .tarot-selected {
+            min-height: 40px;
+            padding: 8px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .tarot-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #4299e1;
+            border-radius: 6px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .tarot-search {
+            position: sticky;
+            top: 0;
+            padding: 10px;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .tarot-option {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #f7fafc;
+            transition: background-color 0.2s ease;
+        }
+
+        .tarot-option:hover {
+            background: #edf2f7;
+        }
+
+        .tarot-option.hidden {
+            display: none;
+        }
+
+        .selected-card {
+            display: inline-block;
+            background: #4299e1;
+            color: white;
+            padding: 4px 8px;
+            margin: 2px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .card-number {
+            width: 60px;
+        }
+
+        .card-date {
+            width: 120px;
+        }
+
+        .card-question {
+            width: 200px;
+        }
+
+        .card-background {
+            width: 150px;
+        }
+
+        .card-spread {
+            width: 120px;
+        }
+
+        .card-interpretation {
+            width: 200px;
+        }
+
+        .card-feedback {
+            width: 150px;
+        }
+
+        .card-notes {
+            width: 150px;
+        }
+
+        .export-section {
+            padding: 20px;
+            background: #ffffff;
+            border-top: 1px solid #e5e5e5;
+        }
+
+        .export-btn {
+            background: #da7756;
+        }
+
+        .export-btn:hover {
+            background: #c96942;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔮 塔羅牌案例資料庫</h1>
+            <p>專業塔羅占卜記錄與分析系統</p>
+        </div>
+
+        <div class="controls">
+            <button class="btn" onclick="addNewRow()">➕ 新增案例</button>
+            <button class="btn btn-danger" onclick="deleteSelectedRows()">🗑️ 刪除選中</button>
+        </div>
+
+        <div class="table-container">
+            <table id="tarotTable">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" onchange="toggleAllRows(this)"></th>
+                        <th>編號</th>
+                        <th>日期</th>
+                        <th>問題</th>
+                        <th>背景</th>
+                        <th>塔羅牌</th>
+                        <th>牌陣</th>
+                        <th>解牌</th>
+                        <th>反饋</th>
+                        <th>備註</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- 初始行會由JavaScript生成 -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="export-section">
+            <button class="btn export-btn" onclick="exportToJSON()">💾 匯出 JSON</button>
+            <button class="btn export-btn" onclick="importFromJSON()">📁 匯入 JSON</button>
+            <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
+        </div>
+    </div>
+
+    <script>
+        // 78張塔羅牌資料
+        const tarotCards = [
+            // 大阿爾克那（Major Arcana）
+            "0. 愚者 (The Fool)", "1. 魔術師 (The Magician)", "2. 女祭司 (The High Priestess)", 
+            "3. 皇后 (The Empress)", "4. 皇帝 (The Emperor)", "5. 教皇 (The Hierophant)", 
+            "6. 戀人 (The Lovers)", "7. 戰車 (The Chariot)", "8. 力量 (Strength)", 
+            "9. 隱者 (The Hermit)", "10. 命運之輪 (Wheel of Fortune)", "11. 正義 (Justice)", 
+            "12. 倒吊人 (The Hanged Man)", "13. 死神 (Death)", "14. 節制 (Temperance)", 
+            "15. 惡魔 (The Devil)", "16. 塔 (The Tower)", "17. 星星 (The Star)", 
+            "18. 月亮 (The Moon)", "19. 太陽 (The Sun)", "20. 審判 (Judgement)", 
+            "21. 世界 (The World)",
+            
+            // 小阿爾克那 - 權杖（Wands）
+            "22. 權杖1", "23. 權杖2", "24. 權杖3", "25. 權杖4", "26. 權杖5", "27. 權杖6", "28. 權杖7", "29. 權杖8", "30. 權杖9", "31. 權杖10",
+            "32. 權杖侍者", "33. 權杖騎士", "34. 權杖皇后", "35. 權杖國王",
+            
+            // 小阿爾克那 - 聖杯（Cups）
+            "36. 聖杯1", "37. 聖杯2", "38. 聖杯3", "39. 聖杯4", "40. 聖杯5", "41. 聖杯6", "42. 聖杯7", "43. 聖杯8", "44. 聖杯9", "45. 聖杯10",
+            "46. 聖杯侍者", "47. 聖杯騎士", "48. 聖杯皇后", "49. 聖杯國王",
+            
+            // 小阿爾克那 - 寶劍（Swords）
+            "50. 寶劍1", "51. 寶劍2", "52. 寶劍3", "53. 寶劍4", "54. 寶劍5", "55. 寶劍6", "56. 寶劍7", "57. 寶劍8", "58. 寶劍9", "59. 寶劍10",
+            "60. 寶劍侍者", "61. 寶劍騎士", "62. 寶劍皇后", "63. 寶劍國王",
+            
+            // 小阿爾克那 - 星幣（Pentacles）
+            "64. 星幣1", "65. 星幣2", "66. 星幣3", "67. 星幣4", "68. 星幣5", "69. 星幣6", "70. 星幣7", "71. 星幣8", "72. 星幣9", "73. 星幣10",
+            "74. 星幣侍者", "75. 星幣騎士", "76. 星幣皇后", "77. 星幣國王"
+        ];
+
+        const spreadTypes = ["時間流", "無牌陣", "二選一"];
+
+        let rowCounter = 1;
+        let tableData = [];
+
+        // 初始化
+        function init() {
+            addNewRow(); // 添加第一行
+        }
+
+        function addNewRow() {
+            const tbody = document.getElementById('tableBody');
+            const row = tbody.insertRow();
+            const rowData = {
+                id: rowCounter,
+                date: '',
+                question: '',
+                background: '',
+                tarotCards: [],
+                spread: '',
+                interpretation: '',
+                feedback: '',
+                notes: ''
+            };
+            
+            tableData.push(rowData);
+
+            row.innerHTML = `
+                <td><input type="checkbox" class="row-checkbox" data-row="${rowCounter}"></td>
+                <td class="card-number">${rowCounter}</td>
+                <td class="card-date"><input type="date" onchange="updateData(${rowCounter}, 'date', this.value)"></td>
+                <td class="card-question"><textarea placeholder="輸入問題..." onchange="updateData(${rowCounter}, 'question', this.value)"></textarea></td>
+                <td class="card-background"><textarea placeholder="背景描述..." onchange="updateData(${rowCounter}, 'background', this.value)"></textarea></td>
+                <td>${createTarotSelector(rowCounter)}</td>
+                <td class="card-spread">
+                    <select onchange="updateData(${rowCounter}, 'spread', this.value)">
+                        <option value="">選擇牌陣</option>
+                        ${spreadTypes.map(type => `<option value="${type}">${type}</option>`).join('')}
+                    </select>
+                </td>
+                <td class="card-interpretation"><textarea placeholder="解牌內容..." onchange="updateData(${rowCounter}, 'interpretation', this.value)"></textarea></td>
+                <td class="card-feedback"><textarea placeholder="客戶反饋..." onchange="updateData(${rowCounter}, 'feedback', this.value)"></textarea></td>
+                <td class="card-notes"><textarea placeholder="備註..." onchange="updateData(${rowCounter}, 'notes', this.value)"></textarea></td>
+            `;
+
+            rowCounter++;
+        }
+
+        function createTarotSelector(rowId) {
+            return `
+                <div class="tarot-selector">
+                    <div class="tarot-selected" onclick="toggleTarotDropdown(${rowId})" id="selected-${rowId}">
+                        點擊選擇塔羅牌
+                    </div>
+                    <div class="tarot-dropdown" id="dropdown-${rowId}">
+                        <div class="tarot-search">
+                            <input type="text" placeholder="搜尋塔羅牌..." oninput="filterTarotCards(${rowId}, this.value)">
+                        </div>
+                        <div id="options-${rowId}">
+                            ${tarotCards.map(card => `
+                                <div class="tarot-option" onclick="toggleTarotCard(${rowId}, '${card}')">
+                                    <input type="checkbox" id="card-${rowId}-${card}"> ${card}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleTarotDropdown(rowId) {
+            const dropdown = document.getElementById(`dropdown-${rowId}`);
+            const isVisible = dropdown.style.display === 'block';
+            
+            // 隱藏所有下拉選單
+            document.querySelectorAll('.tarot-dropdown').forEach(d => d.style.display = 'none');
+            
+            // 切換當前下拉選單
+            if (!isVisible) {
+                dropdown.style.display = 'block';
+            }
+        }
+
+        function toggleTarotCard(rowId, cardName) {
+            const checkbox = document.getElementById(`card-${rowId}-${cardName}`);
+            checkbox.checked = !checkbox.checked;
+            
+            const rowData = tableData.find(data => data.id === rowId);
+            if (checkbox.checked) {
+                if (!rowData.tarotCards.includes(cardName)) {
+                    rowData.tarotCards.push(cardName);
+                }
+            } else {
+                rowData.tarotCards = rowData.tarotCards.filter(card => card !== cardName);
+            }
+            
+            updateSelectedDisplay(rowId);
+        }
+
+        function updateSelectedDisplay(rowId) {
+            const selectedDiv = document.getElementById(`selected-${rowId}`);
+            const rowData = tableData.find(data => data.id === rowId);
+            
+            if (rowData.tarotCards.length === 0) {
+                selectedDiv.innerHTML = '點擊選擇塔羅牌';
+            } else {
+                selectedDiv.innerHTML = rowData.tarotCards.map(card => 
+                    `<span class="selected-card">${card}</span>`
+                ).join('');
+            }
+        }
+
+        function filterTarotCards(rowId, searchTerm) {
+            const options = document.getElementById(`options-${rowId}`);
+            const allOptions = options.querySelectorAll('.tarot-option');
+            
+            allOptions.forEach(option => {
+                const cardName = option.textContent.trim();
+                if (cardName.toLowerCase().includes(searchTerm.toLowerCase())) {
+                    option.classList.remove('hidden');
+                } else {
+                    option.classList.add('hidden');
+                }
+            });
+        }
+
+        function updateData(rowId, field, value) {
+            const rowData = tableData.find(data => data.id === rowId);
+            if (rowData) {
+                rowData[field] = value;
+            }
+        }
+
+        function toggleAllRows(checkbox) {
+            const checkboxes = document.querySelectorAll('.row-checkbox');
+            checkboxes.forEach(cb => cb.checked = checkbox.checked);
+        }
+
+        function deleteSelectedRows() {
+            const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+            if (selectedCheckboxes.length === 0) {
+                alert('請先選擇要刪除的行');
+                return;
+            }
+            
+            if (confirm(`確定要刪除選中的 ${selectedCheckboxes.length} 行嗎？`)) {
+                selectedCheckboxes.forEach(checkbox => {
+                    const rowId = parseInt(checkbox.getAttribute('data-row'));
+                    tableData = tableData.filter(data => data.id !== rowId);
+                    checkbox.closest('tr').remove();
+                });
+            }
+        }
+
+        function exportToJSON() {
+            const dataToExport = {
+                exportDate: new Date().toISOString(),
+                records: tableData
+            };
+            
+            const blob = new Blob([JSON.stringify(dataToExport, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `塔羅占卜記錄_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importFromJSON() {
+            document.getElementById('importFile').click();
+        }
+
+        function handleImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (importedData.records && Array.isArray(importedData.records)) {
+                        // 清空現有資料
+                        document.getElementById('tableBody').innerHTML = '';
+                        tableData = [];
+                        rowCounter = 1;
+                        
+                        // 載入匯入的資料
+                        importedData.records.forEach(record => {
+                            addNewRow();
+                            const currentRow = tableData[tableData.length - 1];
+                            Object.assign(currentRow, record);
+                            
+                            // 更新UI顯示
+                            const rowElement = document.querySelector(`tr:nth-last-child(1)`);
+                            const inputs = rowElement.querySelectorAll('input, select, textarea');
+                            inputs[1].value = record.date || ''; // 日期
+                            inputs[2].value = record.question || ''; // 問題
+                            inputs[3].value = record.background || ''; // 背景
+                            inputs[4].value = record.spread || ''; // 牌陣
+                            inputs[5].value = record.interpretation || ''; // 解牌
+                            inputs[6].value = record.feedback || ''; // 反饋
+                            inputs[7].value = record.notes || ''; // 備註
+                            
+                            // 更新塔羅牌選擇
+                            if (record.tarotCards && record.tarotCards.length > 0) {
+                                updateSelectedDisplay(currentRow.id);
+                            }
+                        });
+                        
+                        alert('資料匯入成功！');
+                    }
+                } catch (error) {
+                    alert('匯入失敗：檔案格式不正確');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // 點擊其他地方時隱藏下拉選單
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.tarot-selector')) {
+                document.querySelectorAll('.tarot-dropdown').forEach(d => d.style.display = 'none');
+            }
+        });
+
+        // 頁面載入時初始化
+        window.onload = init;
+    </script>
+</body>
+</html>
